@@ -33,6 +33,11 @@
           cd dist
           Compress-Archive -Path IOPaint -DestinationPath IOPaint-Windows.zip
 
+      - name: Copy batch file and README to root
+        run: |
+          Copy-Item run_iopaint.bat dist\IOPaint\
+          Copy-Item CLIENT_README.txt dist\IOPaint\
+
       - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:

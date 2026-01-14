@@ -10,8 +10,6 @@ added_files = [
     ('iopaint/web_app/index.html', 'iopaint/web_app'),
     ('iopaint/web_app/favicon.ico', 'iopaint/web_app'),
     ('iopaint/web_app/assets', 'iopaint/web_app/assets'),
-    ('run_iopaint.bat', '.'),
-    ('CLIENT_README.txt', '.'),
 ]
 
 a = Analysis(

@@ -43,9 +43,6 @@ from iopaint.helper import (
 )
 from iopaint.model.utils import torch_gc
 from iopaint.model_manager import ModelManager
-from iopaint.plugins import build_plugins, RealESRGANUpscaler, InteractiveSeg
-from iopaint.plugins.base_plugin import BasePlugin
-from iopaint.plugins.remove_bg import RemoveBG
 from iopaint.schema import (
     GenInfoResponse,
     ApiConfig,
@@ -54,13 +51,8 @@ from iopaint.schema import (
     InpaintRequest,
     RunPluginRequest,
     SDSampler,
-    PluginInfo,
     AdjustMaskRequest,
-    RemoveBGModel,
-    SwitchPluginModelRequest,
     ModelInfo,
-    InteractiveSegModel,
-    RealESRGANModel,
 )
 
 CURRENT_DIR = Path(__file__).parent.absolute().resolve()
@@ -154,7 +146,6 @@ class Api:
         api_middleware(self.app)
 
         self.file_manager = self._build_file_manager()
-        self.plugins = self._build_plugins()
         self.model_manager = self._build_model_manager()
 
         # fmt: off
@@ -165,9 +156,6 @@ class Api:
         self.add_api_route("/api/v1/model", self.api_switch_model, methods=["POST"], response_model=ModelInfo)
         self.add_api_route("/api/v1/inputimage", self.api_input_image, methods=["GET"])
         self.add_api_route("/api/v1/inpaint", self.api_inpaint, methods=["POST"])
-        self.add_api_route("/api/v1/switch_plugin_model", self.api_switch_plugin_model, methods=["POST"])
-        self.add_api_route("/api/v1/run_plugin_gen_mask", self.api_run_plugin_gen_mask, methods=["POST"])
-        self.add_api_route("/api/v1/run_plugin_gen_image", self.api_run_plugin_gen_image, methods=["POST"])
         self.add_api_route("/api/v1/samplers", self.api_samplers, methods=["GET"])
         self.add_api_route("/api/v1/adjust_mask", self.api_adjust_mask, methods=["POST"])
         self.add_api_route("/api/v1/save_image", self.api_save_image, methods=["POST"])
@@ -211,41 +199,12 @@ class Api:
         self.model_manager.switch(req.name)
         return self.model_manager.current_model
 
-    def api_switch_plugin_model(self, req: SwitchPluginModelRequest):
-        if req.plugin_name in self.plugins:
-            self.plugins[req.plugin_name].switch_model(req.model_name)
-            if req.plugin_name == RemoveBG.name:
-                self.config.remove_bg_model = req.model_name
-            if req.plugin_name == RealESRGANUpscaler.name:
-                self.config.realesrgan_model = req.model_name
-            if req.plugin_name == InteractiveSeg.name:
-                self.config.interactive_seg_model = req.model_name
-            torch_gc()
-
     def api_server_config(self) -> ServerConfigResponse:
-        plugins = []
-        for it in self.plugins.values():
-            plugins.append(
-                PluginInfo(
-                    name=it.name,
-                    support_gen_image=it.support_gen_image,
-                    support_gen_mask=it.support_gen_mask,
-                )
-            )
-
         return ServerConfigResponse(
-            plugins=plugins,
+            plugins=[],  # No plugins in LaMa-only version
             modelInfos=self.model_manager.scan_models(),
-            removeBGModel=self.config.remove_bg_model,
-            removeBGModels=RemoveBGModel.values(),
-            realesrganModel=self.config.realesrgan_model,
-            realesrganModels=RealESRGANModel.values(),
-            interactiveSegModel=self.config.interactive_seg_model,
-            interactiveSegModels=InteractiveSegModel.values(),
             enableFileManager=self.file_manager is not None,
             enableAutoSaving=self.config.output_dir is not None,
-            enableControlnet=self.model_manager.enable_controlnet,
-            controlnetMethod=self.model_manager.controlnet_method,
             disableModelSwitch=False,
             isDesktop=False,
             samplers=self.api_samplers(),
@@ -303,49 +262,6 @@ class Api:
             headers={"X-Seed": str(req.sd_seed)},
         )
 
-    def api_run_plugin_gen_image(self, req: RunPluginRequest):
-        ext = "png"
-        if req.name not in self.plugins:
-            raise HTTPException(status_code=422, detail="Plugin not found")
-        if not self.plugins[req.name].support_gen_image:
-            raise HTTPException(
-                status_code=422, detail="Plugin does not support output image"
-            )
-        rgb_np_img, alpha_channel, infos, _ = decode_base64_to_image(req.image)
-        bgr_or_rgba_np_img = self.plugins[req.name].gen_image(rgb_np_img, req)
-        torch_gc()
-
-        if bgr_or_rgba_np_img.shape[2] == 4:
-            rgba_np_img = bgr_or_rgba_np_img
-        else:
-            rgba_np_img = cv2.cvtColor(bgr_or_rgba_np_img, cv2.COLOR_BGR2RGB)
-            rgba_np_img = concat_alpha_channel(rgba_np_img, alpha_channel)
-
-        return Response(
-            content=pil_to_bytes(
-                Image.fromarray(rgba_np_img),
-                ext=ext,
-                quality=self.config.quality,
-                infos=infos,
-            ),
-            media_type=f"image/{ext}",
-        )
-
-    def api_run_plugin_gen_mask(self, req: RunPluginRequest):
-        if req.name not in self.plugins:
-            raise HTTPException(status_code=422, detail="Plugin not found")
-        if not self.plugins[req.name].support_gen_mask:
-            raise HTTPException(
-                status_code=422, detail="Plugin does not support output image"
-            )
-        rgb_np_img, _, _, _ = decode_base64_to_image(req.image)
-        bgr_or_gray_mask = self.plugins[req.name].gen_mask(rgb_np_img, req)
-        torch_gc()
-        res_mask = gen_frontend_mask(bgr_or_gray_mask)
-        return Response(
-            content=numpy_to_bytes(res_mask, "png"),
-            media_type="image/png",
-        )
 
     def api_samplers(self) -> List[str]:
         return [member.value for member in SDSampler.__members__.values()]
@@ -378,24 +294,6 @@ class Api:
             )
         return None
 
-    def _build_plugins(self) -> Dict[str, BasePlugin]:
-        return build_plugins(
-            self.config.enable_interactive_seg,
-            self.config.interactive_seg_model,
-            self.config.interactive_seg_device,
-            self.config.enable_remove_bg,
-            self.config.remove_bg_device,
-            self.config.remove_bg_model,
-            self.config.enable_anime_seg,
-            self.config.enable_realesrgan,
-            self.config.realesrgan_device,
-            self.config.realesrgan_model,
-            self.config.enable_gfpgan,
-            self.config.gfpgan_device,
-            self.config.enable_restoreformer,
-            self.config.restoreformer_device,
-            self.config.no_half,
-        )
 
     def _build_model_manager(self):
         return ModelManager(

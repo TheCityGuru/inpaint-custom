@@ -5,17 +5,7 @@ from typing import Optional, Literal, List
 
 from loguru import logger
 
-from iopaint.const import (
-    INSTRUCT_PIX2PIX_NAME,
-    KANDINSKY22_NAME,
-    POWERPAINT_NAME,
-    ANYTEXT_NAME,
-    SDXL_CONTROLNET_CHOICES,
-    SD2_CONTROLNET_CHOICES,
-    SD_CONTROLNET_CHOICES,
-    SD_BRUSHNET_CHOICES,
-    SDXL_BRUSHNET_CHOICES
-)
+# No additional constants needed for LaMa-only version
 from pydantic import BaseModel, Field, computed_field, model_validator
 
 
@@ -37,102 +27,47 @@ class ModelInfo(BaseModel):
     @computed_field
     @property
     def need_prompt(self) -> bool:
-        return self.model_type in [
-            ModelType.DIFFUSERS_SD,
-            ModelType.DIFFUSERS_SDXL,
-            ModelType.DIFFUSERS_SD_INPAINT,
-            ModelType.DIFFUSERS_SDXL_INPAINT,
-        ] or self.name in [
-            INSTRUCT_PIX2PIX_NAME,
-            KANDINSKY22_NAME,
-            POWERPAINT_NAME,
-            ANYTEXT_NAME,
-        ]
+        return False  # LaMa doesn't need prompts
 
     @computed_field
     @property
     def controlnets(self) -> List[str]:
-        if self.model_type in [
-            ModelType.DIFFUSERS_SDXL,
-            ModelType.DIFFUSERS_SDXL_INPAINT,
-        ]:
-            return SDXL_CONTROLNET_CHOICES
-        if self.model_type in [ModelType.DIFFUSERS_SD, ModelType.DIFFUSERS_SD_INPAINT]:
-            if "sd2" in self.name.lower():
-                return SD2_CONTROLNET_CHOICES
-            else:
-                return SD_CONTROLNET_CHOICES
-        if self.name == POWERPAINT_NAME:
-            return SD_CONTROLNET_CHOICES
-        return []
+        return []  # LaMa doesn't support controlnets
 
     @computed_field
     @property
     def brushnets(self) -> List[str]:
-        if self.model_type in [ModelType.DIFFUSERS_SD]:
-            return SD_BRUSHNET_CHOICES
-        if self.model_type in [ModelType.DIFFUSERS_SDXL]:
-            return SDXL_BRUSHNET_CHOICES
-        return []
+        return []  # LaMa doesn't support brushnets
 
     @computed_field
     @property
     def support_strength(self) -> bool:
-        return self.model_type in [
-            ModelType.DIFFUSERS_SD,
-            ModelType.DIFFUSERS_SDXL,
-            ModelType.DIFFUSERS_SD_INPAINT,
-            ModelType.DIFFUSERS_SDXL_INPAINT,
-        ] or self.name in [POWERPAINT_NAME, ANYTEXT_NAME]
+        return False  # LaMa doesn't support strength
 
     @computed_field
     @property
     def support_outpainting(self) -> bool:
-        return self.model_type in [
-            ModelType.DIFFUSERS_SD,
-            ModelType.DIFFUSERS_SDXL,
-            ModelType.DIFFUSERS_SD_INPAINT,
-            ModelType.DIFFUSERS_SDXL_INPAINT,
-        ] or self.name in [KANDINSKY22_NAME, POWERPAINT_NAME]
+        return False  # LaMa doesn't support outpainting
 
     @computed_field
     @property
     def support_lcm_lora(self) -> bool:
-        return self.model_type in [
-            ModelType.DIFFUSERS_SD,
-            ModelType.DIFFUSERS_SDXL,
-            ModelType.DIFFUSERS_SD_INPAINT,
-            ModelType.DIFFUSERS_SDXL_INPAINT,
-        ]
+        return False  # LaMa doesn't support LCM LoRA
 
     @computed_field
     @property
     def support_controlnet(self) -> bool:
-        return self.model_type in [
-            ModelType.DIFFUSERS_SD,
-            ModelType.DIFFUSERS_SDXL,
-            ModelType.DIFFUSERS_SD_INPAINT,
-            ModelType.DIFFUSERS_SDXL_INPAINT,
-        ]
+        return False  # LaMa doesn't support controlnet
 
     @computed_field
     @property
     def support_brushnet(self) -> bool:
-        return self.model_type in [
-            ModelType.DIFFUSERS_SD,
-            ModelType.DIFFUSERS_SDXL,
-        ]
+        return False  # LaMa doesn't support brushnet
 
     @computed_field
     @property
     def support_powerpaint_v2(self) -> bool:
-        return (
-            self.model_type
-            in [
-                ModelType.DIFFUSERS_SD,
-            ]
-            and self.name != POWERPAINT_NAME
-        )
+        return False  # LaMa doesn't support powerpaint v2
 
 
 class Choices(str, Enum):
@@ -399,9 +334,9 @@ class InpaintRequest(BaseModel):
         "lllyasviel/control_v11p_sd15_canny", description="Controlnet method"
     )
 
-    # BrushNet
+    # BrushNet (not supported in LaMa-only version)
     enable_brushnet: bool = Field(False, description="Enable brushnet")
-    brushnet_method: str = Field(SD_BRUSHNET_CHOICES[0], description="Brushnet method")
+    brushnet_method: str = Field("", description="Brushnet method")
     brushnet_conditioning_scale: float = Field(
         1.0, description="brushnet conditioning scale", ge=0.0, le=1.0
     )
@@ -474,18 +409,10 @@ class GenInfoResponse(BaseModel):
 
 
 class ServerConfigResponse(BaseModel):
-    plugins: List[PluginInfo]
+    plugins: List = []  # No plugins in LaMa-only version
     modelInfos: List[ModelInfo]
-    removeBGModel: RemoveBGModel
-    removeBGModels: List[RemoveBGModel]
-    realesrganModel: RealESRGANModel
-    realesrganModels: List[RealESRGANModel]
-    interactiveSegModel: InteractiveSegModel
-    interactiveSegModels: List[InteractiveSegModel]
     enableFileManager: bool
     enableAutoSaving: bool
-    enableControlnet: bool
-    controlnetMethod: Optional[str]
     disableModelSwitch: bool
     isDesktop: bool
     samplers: List[str]

@@ -10,35 +10,18 @@ from pathlib import Path
 
 from iopaint.const import (
     DEFAULT_MODEL_DIR,
-    DIFFUSERS_SD_CLASS_NAME,
-    DIFFUSERS_SD_INPAINT_CLASS_NAME,
-    DIFFUSERS_SDXL_CLASS_NAME,
-    DIFFUSERS_SDXL_INPAINT_CLASS_NAME,
-    ANYTEXT_NAME,
 )
-from iopaint.model.original_sd_configs import get_config_files
 
 
 def cli_download_model(model: str):
     from iopaint.model import models
-    from iopaint.model.utils import handle_from_pretrained_exceptions
 
-    if model in models and models[model].is_erase_model:
-        logger.info(f"Downloading {model}...")
-        models[model].download()
-        logger.info("Done.")
-    elif model == ANYTEXT_NAME:
+    if model in models and hasattr(models[model], 'is_erase_model') and models[model].is_erase_model:
         logger.info(f"Downloading {model}...")
         models[model].download()
         logger.info("Done.")
     else:
-        logger.info(f"Downloading model from Huggingface: {model}")
-        from diffusers import DiffusionPipeline
-
-        downloaded_path = handle_from_pretrained_exceptions(
-            DiffusionPipeline.download, pretrained_model_name=model, variant="fp16"
-        )
-        logger.info(f"Done. Downloaded to {downloaded_path}")
+        logger.error(f"Model {model} not supported in LaMa-only version")
 
 
 def folder_name_to_show_name(name: str) -> str:
@@ -308,7 +291,5 @@ def scan_models() -> List[ModelInfo]:
     model_dir = os.getenv("XDG_CACHE_HOME", DEFAULT_MODEL_DIR)
     available_models = []
     available_models.extend(scan_inpaint_models(model_dir))
-    available_models.extend(scan_single_file_diffusion_models(model_dir))
-    available_models.extend(scan_diffusers_models())
-    available_models.extend(scan_converted_diffusers_models(model_dir))
+    # Diffusion models removed in LaMa-only version
     return available_models

@@ -44,9 +44,9 @@ interface Photo {
   name: string
 }
 
-const SORT_BY_NAME = "Name"
-const SORT_BY_CREATED_TIME = "Created time"
-const SORT_BY_MODIFIED_TIME = "Modified time"
+const SORT_BY_NAME = "이름"
+const SORT_BY_CREATED_TIME = "생성 시간"
+const SORT_BY_MODIFIED_TIME = "수정 시간"
 
 const IMAGE_TAB = "input"
 const OUTPUT_TAB = "output"
@@ -208,7 +208,7 @@ export default function FileManager(props: Props) {
         <div>{`Images (${photos.length})`}</div>
         <div className="flex">
           <IconButton
-            tooltip="Rows layout"
+            tooltip="행 레이아웃"
             onClick={() => {
               updateFileManagerState({ layout: "rows" })
             }}
@@ -218,7 +218,7 @@ export default function FileManager(props: Props) {
             />
           </IconButton>
           <IconButton
-            tooltip="Grid layout"
+            tooltip="그리드 레이아웃"
             onClick={() => {
               updateFileManagerState({ layout: "masonry" })
             }}
@@ -237,7 +237,7 @@ export default function FileManager(props: Props) {
   return (
     <Dialog open={open} onOpenChange={toggleOpen}>
       <DialogTrigger asChild>
-        <IconButton tooltip="File Manager">
+        <IconButton tooltip="파일 관리자">
           <FolderClosed />
         </IconButton>
       </DialogTrigger>
@@ -257,7 +257,7 @@ export default function FileManager(props: Props) {
                 const target = evt.target as HTMLInputElement
                 updateFileManagerState({ searchText: target.value })
               }}
-              placeholder="Search by file name"
+              placeholder="파일명으로 검색"
             />
           </div>
 
@@ -305,7 +305,7 @@ export default function FileManager(props: Props) {
 
               {fileManagerState.sortOrder === SortOrder.DESCENDING ? (
                 <IconButton
-                  tooltip="Descending Order"
+                  tooltip="내림차순"
                   onClick={() => {
                     updateFileManagerState({ sortOrder: SortOrder.ASCENDING })
                   }}
@@ -314,7 +314,7 @@ export default function FileManager(props: Props) {
                 </IconButton>
               ) : (
                 <IconButton
-                  tooltip="Ascending Order"
+                  tooltip="오름차순"
                   onClick={() => {
                     updateFileManagerState({ sortOrder: SortOrder.DESCENDING })
                   }}

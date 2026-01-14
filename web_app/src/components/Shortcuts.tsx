@@ -51,31 +51,31 @@ export function Shortcuts() {
   return (
     <Dialog open={open} onOpenChange={toggleOpen}>
       <DialogTrigger asChild>
-        <IconButton tooltip="Hotkeys">
+        <IconButton tooltip="단축키">
           <Keyboard />
         </IconButton>
       </DialogTrigger>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>Hotkeys</DialogTitle>
+          <DialogTitle>단축키</DialogTitle>
           <div className="flex gap-2 flex-col pt-4">
-            <ShortCut content="Pan" keys={["Space + Drag"]} />
-            <ShortCut content="Reset Zoom/Pan" keys={["Esc"]} />
-            <ShortCut content="Decrease Brush Size" keys={["["]} />
-            <ShortCut content="Increase Brush Size" keys={["]"]} />
-            <ShortCut content="View Original Image" keys={["Hold Tab"]} />
+            <ShortCut content="이동" keys={["Space + Drag"]} />
+            <ShortCut content="확대/이동 초기화" keys={["Esc"]} />
+            <ShortCut content="브러시 크기 감소" keys={["["]} />
+            <ShortCut content="브러시 크기 증가" keys={["]"]} />
+            <ShortCut content="원본 이미지 보기" keys={["Hold Tab"]} />
 
-            <ShortCut content="Undo" keys={[CmdOrCtrl(), "Z"]} />
-            <ShortCut content="Redo" keys={[CmdOrCtrl(), "Shift", "Z"]} />
-            <ShortCut content="Copy Result" keys={[CmdOrCtrl(), "C"]} />
-            <ShortCut content="Paste Image" keys={[CmdOrCtrl(), "V"]} />
+            <ShortCut content="실행 취소" keys={[CmdOrCtrl(), "Z"]} />
+            <ShortCut content="다시 실행" keys={[CmdOrCtrl(), "Shift", "Z"]} />
+            <ShortCut content="결과 복사" keys={[CmdOrCtrl(), "C"]} />
+            <ShortCut content="이미지 붙여넣기" keys={[CmdOrCtrl(), "V"]} />
             <ShortCut
-              content="Trigger Manually Inpainting"
+              content="수동 인페인팅 실행"
               keys={["Shift", "R"]}
             />
-            <ShortCut content="Toggle Hotkeys Dialog" keys={["H"]} />
-            <ShortCut content="Toggle Settings Dialog" keys={["S"]} />
-            <ShortCut content="Toggle File Manager" keys={["F"]} />
+            <ShortCut content="단축키 창 전환" keys={["H"]} />
+            <ShortCut content="설정 창 전환" keys={["S"]} />
+            <ShortCut content="파일 관리자 전환" keys={["F"]} />
           </div>
         </DialogHeader>
       </DialogContent>

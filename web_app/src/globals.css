@@ -34,39 +34,41 @@ html { font-family: "Inter", "system-ui"; overflow: hidden; }
 
 
 .icon-button-icon-wrapper svg {
-  stroke-width: 1px;
+  stroke-width: 1.5px;
+  stroke: hsl(120, 50%, 60%);
+  color: hsl(120, 50%, 60%);
 }
 
 @layer base {
   :root {
     --background: 0 0% 100%;
-    --foreground: 224 71.4% 4.1%;
+    --foreground: 120 30% 25%;
 
     --card: 0 0% 100%;
-    --card-foreground: 224 71.4% 4.1%;
- 
-    --popover: 0 0% 100%;
-    --popover-foreground: 224 71.4% 4.1%;
- 
-    --primary: 48 100.0% 50.0%;
-    --primary-foreground: 210 20% 98%;
- 
-    --secondary: 220 14.3% 95.9%;
-    --secondary-foreground: 220.9 39.3% 11%;
- 
-    --muted: 220 14.3% 95.9%;
-    --muted-foreground: 220 8.9% 46.1%;
- 
-    --accent: 220 14.3% 95.9%;
-    --accent-foreground: 220.9 39.3% 11%;
- 
-    --destructive: 0 84.2% 60.2%;
-    --destructive-foreground: 210 20% 98%;
+    --card-foreground: 120 30% 25%;
 
-    --border: 220 13% 91%;
-    --input: 220 13% 91%;
-    --ring: 224 71.4% 4.1%;
- 
+    --popover: 0 0% 100%;
+    --popover-foreground: 120 30% 25%;
+
+    --primary: 120 50% 60%;
+    --primary-foreground: 0 0% 100%;
+
+    --secondary: 120 40% 95%;
+    --secondary-foreground: 120 30% 25%;
+
+    --muted: 120 30% 96%;
+    --muted-foreground: 120 20% 45%;
+
+    --accent: 120 45% 90%;
+    --accent-foreground: 120 30% 25%;
+
+    --destructive: 0 84.2% 60.2%;
+    --destructive-foreground: 0 0% 100%;
+
+    --border: 120 40% 75%;
+    --input: 120 35% 85%;
+    --ring: 120 50% 60%;
+
     --radius: 0.5rem;
   }
  
@@ -108,4 +110,25 @@ html { font-family: "Inter", "system-ui"; overflow: hidden; }
   body {
     @apply bg-background text-foreground;
   }
+}
+
+/* Light green theme overrides */
+button svg,
+.lucide,
+[class*="Icon"] {
+  color: hsl(120, 50%, 60%) !important;
+  stroke: hsl(120, 50%, 60%) !important;
+}
+
+button:hover svg,
+button:hover .lucide {
+  color: hsl(120, 60%, 50%) !important;
+  stroke: hsl(120, 60%, 50%) !important;
+}
+
+button:disabled svg,
+button:disabled .lucide {
+  color: hsl(120, 20%, 80%) !important;
+  stroke: hsl(120, 20%, 80%) !important;
+  opacity: 0.5;
 }

@@ -10,9 +10,7 @@ import { RotateCw, Image, Upload } from "lucide-react"
 import FileManager, { MASK_TAB } from "./FileManager"
 import { getMediaBlob, getMediaFile } from "@/lib/api"
 import { useStore } from "@/lib/states"
-import SettingsDialog from "./Settings"
 import { cn, fileToImage } from "@/lib/utils"
-import Coffee from "./Coffee"
 import { useToast } from "./ui/use-toast"
 
 const Header = () => {
@@ -85,7 +83,7 @@ const Header = () => {
   }
 
   return (
-    <header className="h-[60px] px-6 py-4 absolute top-[0] flex justify-between items-center w-full z-20 border-b backdrop-filter backdrop-blur-md bg-background/70">
+    <header className="h-[60px] px-6 py-4 absolute top-[0] flex justify-between items-center w-full z-20 border-b bg-white">
       <div className="flex items-center gap-1">
         {serverConfig.enableFileManager ? (
           <FileManager photoWidth={512} onPhotoClick={handleOnPhotoClick} />
@@ -95,7 +93,7 @@ const Header = () => {
 
         <ImageUploadButton
           disabled={isInpainting}
-          tooltip="Upload image"
+          tooltip="이미지 업로드"
           onFileUpload={(file) => {
             setFile(file)
           }}
@@ -111,7 +109,7 @@ const Header = () => {
         >
           <ImageUploadButton
             disabled={isInpainting}
-            tooltip="Upload custom mask"
+            tooltip="커스텀 마스크 업로드"
             onFileUpload={async (file) => {
               let newCustomMask: HTMLImageElement | null = null
               try {
@@ -158,7 +156,7 @@ const Header = () => {
                   }
                 }}
               >
-                <IconButton tooltip="Run custom mask">
+                <IconButton tooltip="커스텀 마스크 실행">
                   <PlayIcon />
                 </IconButton>
               </PopoverTrigger>
@@ -178,7 +176,7 @@ const Header = () => {
         {file && !model.need_prompt ? (
           <IconButton
             disabled={isInpainting}
-            tooltip="Rerun previous mask"
+            tooltip="이전 마스크 재실행"
             onClick={handleRerunLastMask}
             onMouseEnter={onRerunMouseEnter}
             onMouseLeave={onRerunMouseLeave}
@@ -193,9 +191,7 @@ const Header = () => {
       {model.need_prompt ? <PromptInput /> : <></>}
 
       <div className="flex gap-1">
-        <Coffee />
         <Shortcuts />
-        {serverConfig.disableModelSwitch ? <></> : <SettingsDialog />}
       </div>
     </header>
   )

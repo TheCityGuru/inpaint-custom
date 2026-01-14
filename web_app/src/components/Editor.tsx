@@ -926,7 +926,7 @@ export default function Editor(props: EditorProps) {
 
       {showRefBrush && renderBrush(getBrushStyle(windowCenterX, windowCenterY))}
 
-      <div className="fixed flex bottom-5 border px-4 py-2 rounded-[3rem] gap-8 items-center justify-center backdrop-filter backdrop-blur-md bg-background/70">
+      <div className="fixed flex bottom-5 border px-4 py-2 rounded-[3rem] gap-8 items-center justify-center bg-white">
         <Slider
           className="w-48"
           defaultValue={[50]}
@@ -940,28 +940,28 @@ export default function Editor(props: EditorProps) {
         />
         <div className="flex gap-2">
           <IconButton
-            tooltip="Reset zoom & pan"
+            tooltip="확대/이동 초기화"
             disabled={scale === minScale && panned === false}
             onClick={resetZoom}
           >
             <Expand />
           </IconButton>
           <IconButton
-            tooltip="Undo"
+            tooltip="실행 취소"
             onClick={handleUndo}
             disabled={undoDisabled}
           >
             <Undo />
           </IconButton>
           <IconButton
-            tooltip="Redo"
+            tooltip="다시 실행"
             onClick={handleRedo}
             disabled={redoDisabled}
           >
             <Redo />
           </IconButton>
           <IconButton
-            tooltip="Show original image"
+            tooltip="원본 이미지 보기"
             onPointerDown={(ev) => {
               ev.preventDefault()
               setShowOriginal(() => {
@@ -986,7 +986,7 @@ export default function Editor(props: EditorProps) {
             <Eye />
           </IconButton>
           <IconButton
-            tooltip="Save Image"
+            tooltip="이미지 저장"
             disabled={!renders.length}
             onClick={download}
           >
@@ -996,7 +996,7 @@ export default function Editor(props: EditorProps) {
           {settings.enableManualInpainting &&
           settings.model.model_type === "inpaint" ? (
             <IconButton
-              tooltip="Run Inpainting"
+              tooltip="인페인팅 실행"
               disabled={
                 isProcessing || (!hadDrawSomething() && extraMasks.length === 0)
               }

@@ -1,24 +1,28 @@
 # -*- mode: python ; coding: utf-8 -*-
 import sys
 from pathlib import Path
-from PyInstaller.building.datastruct import Tree
 
 block_cipher = None
 
-# Collect web_app files using Tree for entire directory
-web_app_tree = Tree('iopaint/web_app', prefix='iopaint/web_app', excludes=[])
+# Collect all web_app files individually
+web_app_datas = []
+web_app_path = Path('iopaint/web_app')
+for file in web_app_path.rglob('*'):
+    if file.is_file():
+        # Destination should maintain the iopaint/web_app structure
+        relative_path = file.relative_to('iopaint')
+        dest_folder = str(Path('iopaint') / relative_path.parent)
+        web_app_datas.append((str(file), dest_folder))
 
-# Additional data files
-added_files = [
-    ('run_iopaint.bat', '.'),
-    ('CLIENT_README.txt', '.'),
-]
+# Add batch file and README to root
+web_app_datas.append(('run_iopaint.bat', '.'))
+web_app_datas.append(('CLIENT_README.txt', '.'))
 
 a = Analysis(
     ['iopaint/__main__.py'],
     pathex=[],
     binaries=[],
-    datas=added_files,
+    datas=web_app_datas,
     hiddenimports=[
         'iopaint',
         'iopaint.cli',
@@ -31,6 +35,7 @@ a = Analysis(
         'iopaint.download',
         'iopaint.file_manager',
         'iopaint.helper',
+        'iopaint.runtime',
         'fastapi',
         'uvicorn',
         'uvicorn.logging',
@@ -51,13 +56,13 @@ a = Analysis(
         'typer',
         'loguru',
         'yacs',
-        'torch',
         'torchvision',
         'safetensors',
         'diffusers',
         'transformers',
         'accelerate',
         'omegaconf',
+        'starlette.staticfiles',
     ],
     hookspath=[],
     hooksconfig={},
@@ -86,13 +91,13 @@ exe = EXE(
     bootloader_ignore_signals=False,
     strip=False,
     upx=True,
-    console=True,  # Set to False to hide console window
+    console=True,
     disable_windowed_traceback=False,
     argv_emulation=False,
     target_arch=None,
     codesign_identity=None,
     entitlements_file=None,
-    icon=None,  # Add .ico file path here if you have one
+    icon=None,
 )
 
 coll = COLLECT(
@@ -100,7 +105,6 @@ coll = COLLECT(
     a.binaries,
     a.zipfiles,
     a.datas,
-    web_app_tree,
     strip=False,
     upx=True,
     upx_exclude=[],

@@ -1,30 +1,24 @@
 # -*- mode: python ; coding: utf-8 -*-
 import sys
 from pathlib import Path
+from PyInstaller.building.datastruct import Tree
 
 block_cipher = None
 
-# Get the iopaint package path
-iopaint_path = Path('iopaint')
+# Collect web_app files using Tree for entire directory
+web_app_tree = Tree('iopaint/web_app', prefix='iopaint/web_app', excludes=[])
 
-# Collect web_app files
-web_app_datas = []
-web_app_path = iopaint_path / 'web_app'
-if web_app_path.exists():
-    for file in web_app_path.rglob('*'):
-        if file.is_file():
-            dest_dir = str(file.parent.relative_to(iopaint_path.parent))
-            web_app_datas.append((str(file), dest_dir))
-
-# Add batch file and README to distribution
-web_app_datas.append(('run_iopaint.bat', '.'))
-web_app_datas.append(('CLIENT_README.txt', '.'))
+# Additional data files
+added_files = [
+    ('run_iopaint.bat', '.'),
+    ('CLIENT_README.txt', '.'),
+]
 
 a = Analysis(
     ['iopaint/__main__.py'],
     pathex=[],
     binaries=[],
-    datas=web_app_datas,
+    datas=added_files,
     hiddenimports=[
         'iopaint',
         'iopaint.cli',
@@ -39,6 +33,16 @@ a = Analysis(
         'iopaint.helper',
         'fastapi',
         'uvicorn',
+        'uvicorn.logging',
+        'uvicorn.loops',
+        'uvicorn.loops.auto',
+        'uvicorn.protocols',
+        'uvicorn.protocols.http',
+        'uvicorn.protocols.http.auto',
+        'uvicorn.protocols.websockets',
+        'uvicorn.protocols.websockets.auto',
+        'uvicorn.lifespan',
+        'uvicorn.lifespan.on',
         'pydantic',
         'PIL',
         'cv2',
@@ -96,6 +100,7 @@ coll = COLLECT(
     a.binaries,
     a.zipfiles,
     a.datas,
+    web_app_tree,
     strip=False,
     upx=True,
     upx_exclude=[],

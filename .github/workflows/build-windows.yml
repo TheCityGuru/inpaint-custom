@@ -28,21 +28,21 @@
         run: |
           pyinstaller iopaint_windows.spec
 
+      - name: Copy batch file and README to root
+        run: |
+          Copy-Item run_iopaint.bat dist\Inpaint\
+          Copy-Item CLIENT_README.txt dist\Inpaint\
+
       - name: Create distribution archive
         run: |
           cd dist
-          Compress-Archive -Path IOPaint -DestinationPath IOPaint-Windows.zip
-
-      - name: Copy batch file and README to root
-        run: |
-          Copy-Item run_iopaint.bat dist\IOPaint\
-          Copy-Item CLIENT_README.txt dist\IOPaint\
+          Compress-Archive -Path Inpaint -DestinationPath Inpaint-Windows.zip
 
       - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
-          name: IOPaint-Windows
-          path: dist/IOPaint-Windows.zip
+          name: Inpaint-Windows
+          path: dist/Inpaint-Windows.zip
           retention-days: 90
 
       - name: Get short SHA
@@ -54,7 +54,7 @@
         if: startsWith(github.ref, 'refs/tags/')
         uses: softprops/action-gh-release@v1
         with:
-          files: dist/IOPaint-Windows.zip
+          files: dist/Inpaint-Windows.zip
           draft: false
           prerelease: false
         env:

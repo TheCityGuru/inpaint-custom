@@ -55,7 +55,16 @@ from iopaint.schema import (
     ModelInfo,
 )
 
-CURRENT_DIR = Path(__file__).parent.absolute().resolve()
+import sys
+
+# Handle PyInstaller frozen executable
+if getattr(sys, 'frozen', False):
+    # Running in PyInstaller bundle
+    CURRENT_DIR = Path(sys._MEIPASS) / "iopaint"
+else:
+    # Running in normal Python
+    CURRENT_DIR = Path(__file__).parent.absolute().resolve()
+
 WEB_APP_DIR = CURRENT_DIR / "web_app"
 
 

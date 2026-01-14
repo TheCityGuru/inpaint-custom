@@ -1,28 +1,24 @@
 # -*- mode: python ; coding: utf-8 -*-
 import sys
 from pathlib import Path
+from PyInstaller.utils.hooks import collect_data_files
 
 block_cipher = None
 
-# Collect all web_app files individually
-web_app_datas = []
-web_app_path = Path('iopaint/web_app')
-for file in web_app_path.rglob('*'):
-    if file.is_file():
-        # Destination should maintain the iopaint/web_app structure
-        relative_path = file.relative_to('iopaint')
-        dest_folder = str(Path('iopaint') / relative_path.parent)
-        web_app_datas.append((str(file), dest_folder))
-
-# Add batch file and README to root
-web_app_datas.append(('run_iopaint.bat', '.'))
-web_app_datas.append(('CLIENT_README.txt', '.'))
+# Explicitly add web_app files
+added_files = [
+    ('iopaint/web_app/index.html', 'iopaint/web_app'),
+    ('iopaint/web_app/favicon.ico', 'iopaint/web_app'),
+    ('iopaint/web_app/assets', 'iopaint/web_app/assets'),
+    ('run_iopaint.bat', '.'),
+    ('CLIENT_README.txt', '.'),
+]
 
 a = Analysis(
     ['iopaint/__main__.py'],
     pathex=[],
     binaries=[],
-    datas=web_app_datas,
+    datas=added_files,
     hiddenimports=[
         'iopaint',
         'iopaint.cli',
